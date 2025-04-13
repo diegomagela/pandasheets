@@ -2,9 +2,9 @@
 
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="img/logo_dark.png">
-    <source media="(prefers-color-scheme: light)" srcset="img/logo_light.png">
-    <img src="img/logo_light.png" alt="Logo" width="250">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/diegomagela/pandasheets/refs/heads/main/img/logo_light.png">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/diegomagela/pandasheets/refs/heads/main/img/logo_dark.png">
+    <img src="https://raw.githubusercontent.com/diegomagela/pandasheets/refs/heads/main/img/logo_light.png" alt="Logo" width="250">
   </picture>
 </div>
 
