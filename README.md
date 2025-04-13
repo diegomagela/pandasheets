@@ -8,11 +8,11 @@
   </picture>
 </div>
 
-**pandasheets** is a convenient wrapper around [gspread](https://github.com/burnash/gspread) that simplifies common operations (such as downloading, uploading, and appending) when working with Google Sheets using [pandas](https://github.com/pandas-dev/pandas). 
+**pandasheets** is a convenient wrapper around [gspread](https://github.com/burnash/gspread) that simplifies common operations such as downloading, uploading, and appending, when working with [Google Sheets](https://sheets.google.com) using [pandas](https://github.com/pandas-dev/pandas). 
 
 ## Getting Started
 
-To use **pandasheets**, you need to set up a Google Cloud service account credential that grants your code access to manage spreadsheets on your behalf. Below are the steps to create and configure these credentials.
+To use **pandasheets**, you need to set up a Google Cloud service account credential that grants your code access to manage spreadsheets. Below are the steps to create and configure these credentials:
 
 ### 1. Enable API access for your project
 1. Go to the [Google Cloud Console](https://console.cloud.google.com).
