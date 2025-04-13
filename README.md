@@ -1,9 +1,11 @@
 # pandasheets
 
 <div align="center">
+  <picture>
     <source media="(prefers-color-scheme: dark)" srcset="img/logo_dark.png">
-    <!-- <source media="(prefers-color-scheme: light)" srcset="img/logo_light.png"> -->
-    <img src="img/logo_light.png" alt="Logo" width="250" height="auto">
+    <source media="(prefers-color-scheme: light)" srcset="img/logo_light.png">
+    <img src="img/logo_light.png" alt="Logo" width="250">
+  </picture>
 </div>
 
 **pandasheets** is a convenient wrapper around [gspread](https://github.com/burnash/gspread) that simplifies common operations (such as downloading, uploading, and appending) when working with Google Sheets using Pandas. 
