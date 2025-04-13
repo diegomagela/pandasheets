@@ -8,7 +8,7 @@
   </picture>
 </div>
 
-**pandasheets** is a convenient wrapper around [gspread](https://github.com/burnash/gspread) that simplifies common operations (such as downloading, uploading, and appending) when working with Google Sheets using Pandas. 
+**pandasheets** is a convenient wrapper around [gspread](https://github.com/burnash/gspread) that simplifies common operations (such as downloading, uploading, and appending) when working with Google Sheets using [pandas](https://github.com/pandas-dev/pandas). 
 
 ## Getting Started
 
