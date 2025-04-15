@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pandasheets"
 authors = [{ name = "Diego Magela", email = "diego.magela1@gmail.com" }]
-description="Lightweight wrapper around gspread that simplifies tasks like downloading, uploading, and appending data from Google Sheets using Pandas."
+description = "Lightweight wrapper around gspread that simplifies tasks like downloading, uploading, and appending data from Google Sheets using Pandas."
 readme = "README.md"
 maintainers = [{ name = "Diego Magela", email = "diego.magela1@gmail.com" }]
 version = "0.1.1"
