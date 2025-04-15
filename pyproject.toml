@@ -18,5 +18,8 @@ requires-python = ">=3.8"
 [project.license]
 file = "LICENSE.txt"
 
+[project.readme]
+file = "README.md"
+
 [tool.setuptools.packages.find]
 where = ["."]
