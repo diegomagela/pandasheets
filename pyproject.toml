@@ -7,7 +7,7 @@ name = "pandasheets"
 authors = [{ name = "Diego Magela", email = "diego.magela1@gmail.com" }]
 readme = "README.md"
 maintainers = [{ name = "Diego Magela", email = "diego.magela1@gmail.com" }]
-version = "0.1"
+version = "0.1.1"
 dependencies = [
   "gspread",
   "pandas"
