@@ -121,7 +121,7 @@ ps.get_sheet_to_dataframe(
 import pandasheets as ps
 
 # Create a sample DataFrame to be appended
-df_to_append = pd.DataFram({
+df_to_append = pd.DataFrame({
     "column_A": ["A1", "A2", "A3"],
     "column_B": ["B1", "B2", "B3"],
 })
