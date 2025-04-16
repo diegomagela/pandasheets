@@ -104,7 +104,7 @@ By default, the DataFrame will be uploaded formatted as:
 If you wish to avoid the default formatting, call the function with the `formatting` parameter set to `False`:
 
 ```python
-ps.get_sheet_to_dataframe(
+ps.upload_dataframe_to_spreadsheet(
     df=df,
     sheet=sheet,
     spreadsheet=spreadsheet,
@@ -116,7 +116,7 @@ ps.get_sheet_to_dataframe(
 By default, if a sheet with the same name already exists in the specified spreadsheet, a `ValueError` will be raised, as a new sheet will **not** be created. If you intend to overwrite the content of an existing sheet, set the parameter `overwrite` to `True`
 
 ```python
-ps.get_sheet_to_dataframe(
+ps.upload_dataframe_to_spreadsheet(
     df=df,
     sheet=sheet,
     spreadsheet=spreadsheet,
