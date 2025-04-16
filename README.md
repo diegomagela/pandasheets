@@ -113,7 +113,20 @@ ps.get_sheet_to_dataframe(
 )
 ```
 
-> **Important**: If a sheet with the same name already exists in the specified spreadsheet, a `ValueError` will be raised. The target spreadsheet must exist prior to uploading the sheet, otherwise an exception will be raised. No new spreadsheet will be created automatically.
+By default, if a sheet with the same name already exists in the specified spreadsheet, a `ValueError` will be raised, as a new sheet will **not** be created. If you intend to overwrite the content of an existing sheet, set the parameter `overwrite` to `True`
+
+```python
+ps.get_sheet_to_dataframe(
+    df=df,
+    sheet=sheet,
+    spreadsheet=spreadsheet,
+    credential=credential,
+    formatting=False,
+    overwrite=True
+)
+```
+
+> **Important**: All the content of the existing sheet will be overwritten if `overwrite=True`. If you only intend to append new values, use `append_dataframe_to_sheet` as shown below.
 
 ### Appending a DataFrame to an existing sheet
 
