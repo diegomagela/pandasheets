@@ -1,107 +1,124 @@
 import pandas
 import gspread
-from gspread.exceptions import SpreadsheetNotFound, WorksheetNotFound
+from gspread.exceptions import SpreadsheetNotFound, WorksheetNotFound, APIError
 from pathlib import Path
 
 
-def open_spreadsheet(spreadsheet: str, credential: str | Path) -> gspread.Spreadsheet:
-    """
-    Opens a Google Spreadsheet using the given service account credentials.
+class pandasheets:
+    def __init__(
+        self,
+        credential: str | Path,
+    ):
+        """
+        Initialize the Pandasheets client and validate the service-account credential.
 
-    Args:
-        spreadsheet (str): The name of the Google Spreadsheet to open.
-        credential (str | Path): Path to the JSON credential file for Google API authentication.
+        Args:
+            credential: Path to your service-account JSON credentials file.
 
-    Returns:
-        gspread.Spreadsheet: The opened Spreadsheet object, allowing further operations.
+        Raises:
+            FileNotFoundError: If the credential file is not found.
+            ValueError: If authentication fails due to invalid credentials.
+        """
+        self._credential = Path(credential)
+        if not self._credential.exists():
+            raise FileNotFoundError(f"Credential file not found: {self._credential}")
 
-    Raises:
-        gspread.exceptions.SpreadsheetNotFound: If the spreadsheet name is incorrect or inaccessible.
-        FileNotFoundError: If the credential file is missing.
-        ValueError: If authentication fails due to invalid credentials.
-    """
+        # Attempt to authenticate with Google Sheets
+        try:
+            self._client = gspread.service_account(filename=str(self._credential))
+        except Exception as e:
+            raise ValueError(f"Failed to authenticate with provided credential: {e}")
 
-    # Ensure the credential file exists
-    credential = Path(credential)
-    if not credential.exists():
-        raise FileNotFoundError(f"Credential file not found: {credential}")
+    def open_spreadsheet(self, spreadsheet: str) -> gspread.Spreadsheet:
+        """
+        Opens and returns a Google Spreadsheet.
 
-    # Define API scopes
-    scope = [
-        "https://www.googleapis.com/auth/spreadsheets",
-        "https://www.googleapis.com/auth/drive",
-    ]
+        Args:
+            spreadsheet (str): The name of the Google Spreadsheet to open.
 
-    try:
-        # Load credential to authenticate with Google Sheets
-        client = gspread.service_account(credential)
+        Returns:
+            gspread.Spreadsheet: The opened Spreadsheet object, allowing further operations.
 
-        # Open and return the spreadsheet object
-        return client.open(spreadsheet)
+        Raises:
+            gspread.exceptions.SpreadsheetNotFound: If the spreadsheet name is incorrect or inaccessible.
+            FileNotFoundError: If the credential file is missing.
+            ValueError: If authentication fails due to invalid credentials.
+        """
 
-    except SpreadsheetNotFound:
-        raise SpreadsheetNotFound(
-            f"Spreadsheet '{spreadsheet}' not found or inaccessible."
-        )
+        try:
+            # Open and return the spreadsheet object
+            return self._client.open(spreadsheet)
 
-    except Exception as e:
-        raise ValueError(f"An error occurred while opening the spreadsheet: {e}")
+        except SpreadsheetNotFound:
+            raise SpreadsheetNotFound(
+                f"Spreadsheet '{spreadsheet}' not found or inaccessible."
+            )
 
+        except APIError as e:
+            raise ValueError(
+                f"Google API error when opening spreadsheet '{spreadsheet}': {e}"
+            )
 
-def get_sheet_to_dataframe(
-    sheet: str, spreadsheet: str, credential: str | Path
-) -> pandas.DataFrame:
-    """
-    Retrieves data from a specific worksheet in a Google Spreadsheet and returns it as a pandas DataFrame.
+        except Exception as e:
+            raise ValueError(f"An error occurred while opening the spreadsheet: {e}")
 
-    Args:
-        sheet (str): The name of the worksheet to retrieve.
-        spreadsheet (str): The name of the Google Spreadsheet to open.
-        credential (str | Path): Path to the JSON credential file for Google API authentication.
+    def sheet_exists(self, sheet: str, spreadsheet: gspread.Spreadsheet) -> bool:
+        """
+        Checks if a worksheet exists in a given Google Spreadsheet.
 
-    Returns:
-        pandas.DataFrame: A DataFrame containing the worksheet data.
+        Args:
+            spreadsheet (gspread.Spreadsheet): The Google Spreadsheet object.
+            sheet (str): The name of the worksheet to check.
 
-    Raises:
-        FileNotFoundError: If the credential file is missing.
-        gspread.exceptions.SpreadsheetNotFound: If the spreadsheet is incorrect or inaccessible.
-        gspread.exceptions.WorksheetNotFound: If the worksheet name is incorrect.
-        ValueError: If data retrieval fails.
-    """
+        Returns:
+            bool: True if the worksheet exists, False otherwise.
+        """
+        try:
+            spreadsheet.worksheet(sheet)
+            return True
+        except WorksheetNotFound:
+            return False
 
-    try:
+    def get_sheet_to_dataframe(self, sheet: str, spreadsheet: str) -> pandas.DataFrame:
+        """
+        Retrieves data from a specific worksheet in a Google Spreadsheet and returns it as a pandas DataFrame.
+
+        Args:
+            sheet (str): The name of the worksheet to retrieve.
+            spreadsheet (str): The name of the Google Spreadsheet to open.
+
+        Returns:
+            pandas.DataFrame: A DataFrame containing the worksheet data.
+
+        Raises:
+            gspread.exceptions.SpreadsheetNotFound: If the spreadsheet is incorrect or inaccessible.
+            gspread.exceptions.WorksheetNotFound: If the worksheet name is incorrect.
+            ValueError: If data retrieval fails.
+        """
+
         # Open the spreadsheet
-        spreadsheet_obj = open_spreadsheet(
-            spreadsheet=spreadsheet, credential=credential
-        )
+        spreadsheet_obj = self.open_spreadsheet(spreadsheet=spreadsheet)
 
-        # Open the worksheet
-        worksheet = spreadsheet_obj.worksheet(sheet)
+        try:
+            # Open the worksheet
+            worksheet = spreadsheet_obj.worksheet(sheet)
+        except WorksheetNotFound:
+            raise WorksheetNotFound(
+                f"Worksheet '{sheet}' not found in '{spreadsheet}'."
+            )
 
         # Get all data from the worksheet
         data = worksheet.get_all_records()
 
-        # Convert to pandas DataFrame
-        df = pandas.DataFrame(data, index=None)
+        return pandas.DataFrame(data, index=None)
 
-        return df
+    def get_spreadsheet(
+        self,
+        spreadsheet: str,
+    ) -> dict[str, pandas.DataFrame]:
 
-    except WorksheetNotFound:
-        raise WorksheetNotFound(f"Worksheet '{sheet}' not found in '{spreadsheet}'.")
-
-    except Exception as e:
-        raise ValueError(f"An error occurred while retrieving the worksheet: {e}")
-
-
-def get_spreadsheet(
-    spreadsheet: str, credential: str | Path
-) -> dict[str, pandas.DataFrame]:
-
-    try:
         # Open the spreadsheet
-        spreadsheet_obj = open_spreadsheet(
-            spreadsheet=spreadsheet, credential=credential
-        )
+        spreadsheet_obj = self.open_spreadsheet(spreadsheet=spreadsheet)
 
         spreadsheet_dict = {}
         for worksheet in spreadsheet_obj.worksheets():
@@ -115,87 +132,53 @@ def get_spreadsheet(
 
         return spreadsheet_dict
 
-    except SpreadsheetNotFound:
-        raise SpreadsheetNotFound(
-            f"Spreadsheet '{spreadsheet}' not found or inaccessible."
-        )
+    def upload_dataframe_to_spreadsheet(
+        self,
+        df: pandas.DataFrame,
+        sheet: str,
+        spreadsheet: str,
+        formatting: bool = True,
+        overwrite: bool = False,
+    ) -> None:
+        """
+        Uploads a pandas DataFrame to a newly created formatted worksheet in a Google Spreadsheet.
 
-    except Exception as e:
-        raise ValueError(f"An error occurred while opening the spreadsheet: {e}")
+        This function creates a new worksheet in the specified Google Spreadsheet and uploads the data
+        from the provided DataFrame. If the DataFrame is empty, or if a worksheet with the specified name
+        already exists, the function raises a ValueError. Optional formatting can be applied to the worksheet
+        after data upload:
+        - Bold formatting is applied to the header row.
+        - All cells in columns A to Z are set to clip text wrapping.
+        - The first row is frozen to keep the headers visible during scrolling.
 
+        Args:
+            df (pandas.DataFrame): The DataFrame to upload.
+            sheet (str): The name of the worksheet to create and upload data to.
+            spreadsheet (str): The name of the Google Spreadsheet to open.
+            formatting (bool, optional): Whether to apply formatting to the worksheet after upload. Defaults to True.
+            overwrite (bool, optional): Whether overwrite existing sheet. Defaults to False.
 
-def sheet_exists(sheet: str, spreadsheet: gspread.Spreadsheet) -> bool:
-    """
-    Checks if a worksheet exists in a given Google Spreadsheet.
+        Raises:
+            ValueError: If the worksheet already exists or the DataFrame is empty.
+            Exception: If an unexpected error occurs.
 
-    Args:
-        spreadsheet (gspread.Spreadsheet): The Google Spreadsheet object.
-        sheet (str): The name of the worksheet to check.
-
-    Returns:
-        bool: True if the worksheet exists, False otherwise.
-    """
-    try:
-        spreadsheet.worksheet(sheet)
-        return True
-    except WorksheetNotFound:
-        return False
-
-
-def upload_dataframe_to_spreadsheet(
-    df: pandas.DataFrame,
-    sheet: str,
-    spreadsheet: str,
-    credential: str | Path,
-    formatting: bool = True,
-    overwrite: bool = False,
-) -> None:
-    """
-    Uploads a pandas DataFrame to a newly created formatted worksheet in a Google Spreadsheet.
-
-    This function creates a new worksheet in the specified Google Spreadsheet and uploads the data
-    from the provided DataFrame. If the DataFrame is empty, or if a worksheet with the specified name
-    already exists, the function raises a ValueError. Optional formatting can be applied to the worksheet
-    after data upload:
-    - Bold formatting is applied to the header row.
-    - All cells in columns A to Z are set to clip text wrapping.
-    - The first row is frozen to keep the headers visible during scrolling.
-
-    Args:
-        df (pandas.DataFrame): The DataFrame to upload.
-        sheet (str): The name of the worksheet to create and upload data to.
-        spreadsheet (str): The name of the Google Spreadsheet to open.
-        credential (str | Path): The path to the JSON credential file for Google API authentication.
-        formatting (bool, optional): Whether to apply formatting to the worksheet after upload. Defaults to True.
-        overwrite (bool, optional): Whether overwrite existing sheet. Defaults to False.
-
-    Raises:
-        FileNotFoundError: If the credential file is missing.
-        gspread.exceptions.SpreadsheetNotFound: If the spreadsheet is incorrect or inaccessible.
-        ValueError: If the worksheet already exists or the DataFrame is empty.
-        Exception: If an unexpected error occurs.
-
-    Returns:
-        None
-    """
-
-    try:
-        # Open the spreadsheet
-        spreadsheet_obj = open_spreadsheet(
-            spreadsheet=spreadsheet, credential=credential
-        )
-
+        Returns:
+            None
+        """
         # Ensure DataFrame is not empty
         if df.empty:
             raise ValueError(
                 "Error: The DataFrame is empty. Cannot upload an empty worksheet."
             )
 
+        # Open the spreadsheet
+        spreadsheet_obj = self.open_spreadsheet(spreadsheet=spreadsheet)
+
         # Replace NaN values with an empty string
         df = df.fillna("")
 
         # Check if the worksheet already exists
-        if sheet_exists(spreadsheet=spreadsheet_obj, sheet=sheet):
+        if self.sheet_exists(spreadsheet=spreadsheet_obj, sheet=sheet):
 
             if overwrite:
                 worksheet = spreadsheet_obj.worksheet(sheet)
@@ -247,48 +230,39 @@ def upload_dataframe_to_spreadsheet(
             f"Successfully uploaded pandas.DataFrame to new worksheet '{sheet}' in '{spreadsheet}'."
         )
 
-    except ValueError as ve:
-        print(ve)  # Handles worksheet existence and empty DataFrame errors
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+    def append_dataframe_to_sheet(
+        self,
+        df: pandas.DataFrame,
+        sheet: str,
+        spreadsheet: str,
+        duplicates: bool = False,
+    ) -> None:
+        """
+        Appends new rows from a pandas DataFrame to an existing worksheet in a Google Spreadsheet.
 
+        Args:
+            df (pandas.DataFrame): The DataFrame containing the new rows to append.
+            sheet (str): The name of the worksheet to append data to.
+            spreadsheet (str): The name of the Google Spreadsheet.
+            duplicates (bool, optional): Skip rows that already exist exactly. Defaults to False.
 
-def append_dataframe_to_sheet(
-    df: pandas.DataFrame,
-    sheet: str,
-    spreadsheet: str,
-    credential: str | Path,
-    duplicates: bool = False,
-) -> None:
-    """
-    Appends new rows from a pandas DataFrame to an existing worksheet in a Google Spreadsheet.
+        Raises:
+            ValueError: If the worksheet does not exist or the DataFrame is empty.
 
-    Args:
-        df (pandas.DataFrame): The DataFrame containing the new rows to append.
-        sheet (str): The name of the worksheet to append data to.
-        spreadsheet (str): The name of the Google Spreadsheet.
-        credential (str | Path): The path to the JSON credential file for Google API authentication.
-
-    Raises:
-        ValueError: If the worksheet does not exist or the DataFrame is empty.
-
-    Returns:
-        None
-    """
-
-    try:
-        # Open the spreadsheet
-        spreadsheet_obj = open_spreadsheet(
-            spreadsheet=spreadsheet, credential=credential
-        )
+        Returns:
+            None
+        """
 
         if df.empty:
             raise ValueError(
                 "Error: The pandas.DataFrame is empty. Cannot append empty data. Verify the pandas.DataFrame."
             )
 
+        # Open the spreadsheet
+        spreadsheet_obj = self.open_spreadsheet(spreadsheet=spreadsheet)
+
         # Check if the worksheet exists
-        if not sheet_exists(sheet=sheet, spreadsheet=spreadsheet_obj):
+        if not self.sheet_exists(sheet=sheet, spreadsheet=spreadsheet_obj):
             raise ValueError(
                 f"Error: Worksheet '{sheet}' does not exist in '{spreadsheet}'."
             )
@@ -306,30 +280,21 @@ def append_dataframe_to_sheet(
                 f"Error: The sheet {sheet} appears to be empty and has no header row."
             )
 
-        # Get sheet headers
+        # Get sheet headers and rows
         existing_headers = all_sheet_data[0]
-
-        # Get sheet rows data
         existing_rows = {tuple(row) for row in all_sheet_data[1:]}
 
         data_to_append = []
         for row in df.to_dict(orient="records"):
-            new_row = [row.get(header, "") for header in existing_headers]
-
-            if not duplicates:
-                if tuple(new_row) not in existing_rows:
-                    data_to_append.append(new_row)
-
-            else:
+            # Convert each field to string for accurate comparison
+            new_row = [str(row.get(header, "")) for header in existing_headers]
+            if duplicates or tuple(new_row) not in existing_rows:
                 data_to_append.append(new_row)
 
-        worksheet.append_rows(data_to_append)
+        # Append only if there's new data
+        if data_to_append:
+            worksheet.append_rows(data_to_append)
 
         print(
             f"Successfully appended `df` pd.DataFrame to '{sheet}' in '{spreadsheet}' spreadshet."
         )
-
-    except ValueError as ve:
-        print(str(ve))  # Handles worksheet existence and empty DataFrame errors
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
