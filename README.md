@@ -58,42 +58,44 @@ pip install pandasheets
 
 ## Usage
 
-### Downloading a sheet from Google Sheets into a DataFrame
+### Instantiate once with the path to your JSON key
 
 ```python
 import pandasheets as ps
+PS = ps.pandasheets(credential="path/to/credential.json")
+```
 
-# Define the sheet name, spreadsheet name, and path to the JSON credential file
+
+### Downloading a sheet from Google Sheets into a DataFrame
+
+```python
+
+# Define the sheet name, spreadsheet name
 
 sheet = "mySheet" # sheet to be downloaded and loaded as a DataFrame
 spreadsheet = "mySpreadsheet" # Name of the spreadsheet containing the sheet
-credential = "myCredential.json" # Path to the JSON credential file
 
 # Download the sheet and load it as a DataFrame
-df = ps.get_sheet_to_dataframe(
+df = PS.get_sheet_to_dataframe(
     sheet=sheet,
     spreadsheet=spreadsheet,
-    credential=credential
 )
 ```
 
 ### Uploading a DataFrame to a new sheet
 
 ```python
-import pandasheets as ps
 
 # Define your DataFrame, target sheet, spreadsheet name, and credential file
 
 df = myDf # DataFrame to be uploaded
 sheet = "mySheet" # Target sheet name for the upload
 spreadsheet = "mySpreadsheet" # Name of the spreadsheet where the sheet will be created
-credential = "myCredential.json" # Path to the JSON credential file
 
-ps.upload_dataframe_to_spreadsheet(
+PS.upload_dataframe_to_spreadsheet(
     df=df,
     sheet=sheet,
     spreadsheet=spreadsheet,
-    credential=credential
 )
 ```
 By default, the DataFrame will be uploaded formatted as:
@@ -108,7 +110,6 @@ ps.upload_dataframe_to_spreadsheet(
     df=df,
     sheet=sheet,
     spreadsheet=spreadsheet,
-    credential=credential,
     formatting=False
 )
 ```
@@ -116,11 +117,10 @@ ps.upload_dataframe_to_spreadsheet(
 By default, if a sheet with the same name already exists in the specified spreadsheet, a `ValueError` will be raised, as a new sheet will **not** be created. If you intend to overwrite the content of an existing sheet, set the parameter `overwrite` to `True`
 
 ```python
-ps.upload_dataframe_to_spreadsheet(
+PS.upload_dataframe_to_spreadsheet(
     df=df,
     sheet=sheet,
     spreadsheet=spreadsheet,
-    credential=credential,
     formatting=False,
     overwrite=True
 )
@@ -131,7 +131,6 @@ ps.upload_dataframe_to_spreadsheet(
 ### Appending a DataFrame to an existing sheet
 
 ```python
-import pandasheets as ps
 
 # Create a sample DataFrame to be appended
 df_to_append = pd.DataFrame({
@@ -141,13 +140,11 @@ df_to_append = pd.DataFrame({
 
 sheet = "mySheet" # Sheet name to which the data will be appended
 spreadsheet = "mySpreadsheet" # Spreadsheet name where the sheet exists
-credential = "myCredential.json" # Path to the JSON credential file
 
 ps.append_dataframe_to_sheet(
     df=df_to_append,
     sheet=sheet,
     spreadsheet=spreadsheet,
-    credential=credential
 )
 ```
 
@@ -160,7 +157,6 @@ ps.append_dataframe_to_sheet(
     df=df,
     sheet=sheet,
     spreadsheet=spreadsheet,
-    credential=credential,
     duplicates=True
 )
 ```
