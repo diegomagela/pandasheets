@@ -106,7 +106,7 @@ By default, the DataFrame will be uploaded formatted as:
 If you wish to avoid the default formatting, call the function with the `formatting` parameter set to `False`:
 
 ```python
-ps.upload_dataframe_to_spreadsheet(
+PS.upload_dataframe_to_spreadsheet(
     df=df,
     sheet=sheet,
     spreadsheet=spreadsheet,
@@ -141,7 +141,7 @@ df_to_append = pd.DataFrame({
 sheet = "mySheet" # Sheet name to which the data will be appended
 spreadsheet = "mySpreadsheet" # Spreadsheet name where the sheet exists
 
-ps.append_dataframe_to_sheet(
+PS.append_dataframe_to_sheet(
     df=df_to_append,
     sheet=sheet,
     spreadsheet=spreadsheet,
@@ -153,7 +153,7 @@ ps.append_dataframe_to_sheet(
 If duplicate values are acceptable and you would like to append them, set the `duplicates` parameter to `True`:
 
 ```python
-ps.append_dataframe_to_sheet(
+PS.append_dataframe_to_sheet(
     df=df,
     sheet=sheet,
     spreadsheet=spreadsheet,
