@@ -181,8 +181,14 @@ class pandasheets:
         if self.sheet_exists(spreadsheet=spreadsheet_obj, sheet=sheet):
 
             if overwrite:
-                worksheet = spreadsheet_obj.worksheet(sheet)
-                worksheet.clear()
+                # get the old worksheet
+                old_worksheet = spreadsheet_obj.worksheet(sheet)
+                # delet it
+                spreadsheet_obj.del_worksheet(old_worksheet)
+                # create a new one
+                worksheet = spreadsheet_obj.add_worksheet(
+                    title=sheet, rows=str(df.shape[0] + 1), cols=str(df.shape[1])
+                )
 
             else:
                 raise ValueError(
@@ -191,7 +197,9 @@ class pandasheets:
 
         else:
             # Create a new worksheet
-            worksheet = spreadsheet_obj.add_worksheet(title=sheet, rows="1", cols="1")
+            worksheet = spreadsheet_obj.add_worksheet(
+                title=sheet, rows=str(df.shape[0] + 1), cols=str(df.shape[1])
+            )
 
         # Convert DataFrame to list format
         data_to_write = [df.columns.values.tolist()] + df.values.tolist()
