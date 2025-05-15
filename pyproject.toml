@@ -16,6 +16,9 @@ dependencies = [
 keywords = ["Google Sheets", "API"]
 requires-python = ">=3.8"
 
+[project.urls]
+Homepage = "https://github.com/diegomagela/pandasheets"
+
 [project.license]
 file = "LICENSE.txt"
 
