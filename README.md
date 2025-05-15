@@ -1,5 +1,8 @@
 # pandasheets
 
+[![PyPI version](https://img.shields.io/pypi/v/pandasheets.svg)](https://pypi.org/project/pandasheets/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/pandasheets.svg)](https://pypi.org/project/pandasheets/)
+
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/diegomagela/pandasheets/refs/heads/main/img/logo_dark.png">
