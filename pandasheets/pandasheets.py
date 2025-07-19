@@ -208,17 +208,25 @@ class pandasheets:
         worksheet.update(data_to_write, raw=False)
 
         if formatting:
-            # Get the sheet ID for formatting
-            sheet_id = worksheet._properties["sheetId"]
+            n_columns = df.shape[1]
+
+            end_header_cell = gspread.utils.rowcol_to_a1(1, n_columns)
+            end_column_letter = "".join(filter(str.isalpha, end_header_cell))
+
+            header_range = f"A1:{end_header_cell}"
+            columns_range = f"A:{end_column_letter}"
 
             worksheet.format(
-                "A1:Z1",
+                header_range,
                 {
                     "textFormat": {"bold": True},
                 },
             )
 
-            worksheet.format("A:Z", {"wrapStrategy": "CLIP"})
+            worksheet.format(columns_range, {"wrapStrategy": "CLIP"})
+
+            # Get the sheet ID for formatting
+            sheet_id = worksheet._properties["sheetId"]
 
             # Request to freeze the first row
             freeze_request = {
@@ -230,6 +238,8 @@ class pandasheets:
                     "fields": "gridProperties.frozenRowCount",
                 }
             }
+
+            worksheet.set_basic_filter(header_range)
 
             # Send batch update request with separate operations
             spreadsheet_obj.batch_update({"requests": [freeze_request]})
